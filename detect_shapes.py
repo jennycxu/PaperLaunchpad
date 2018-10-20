@@ -51,6 +51,13 @@ for cnt in contours:
             if(poly.is_valid_size()):
                 pts = np.array([points], np.int32)
                 pts = pts.reshape((-1,1,2))
+
+                # figuring out valid touch area 
+                top_left = poly.get_valid_shape()[0]
+                bottom_right = poly.get_valid_shape()[3]
+
+                # https://docs.opencv.org/3.1.0/d6/d6e/group__imgproc__draw.html#ga07d2f74cadcf8e305e810ce8eed13bc9
+                img = cv2.rectangle(img,top_left,bottom_right,(0,255,0),-1)
                 img = cv2.polylines(img,[pts],True,(0,255,255),6)
                 for point in tuple_points:
                     radius = 10
