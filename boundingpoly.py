@@ -6,6 +6,7 @@ class BoundingPoly :
        self.similar_threshold = 50 
        self.valid_area_shift = 10
 
+    # uses algorithm here: https://stackoverflow.com/questions/24467972/calculate-area-of-polygon-given-x-y-coordinates
     def get_area(self):
         x = []
         y = []
