@@ -4,7 +4,7 @@ class BoundingPoly :
        self.points = points 
        self.valid_size = 2000
        self.similar_threshold = 50 
-       self.valid_area_shift = 20
+       self.valid_area_shift = 10
 
     def get_area(self):
         x = []
@@ -25,21 +25,21 @@ class BoundingPoly :
         new_points = []
         min_x,min_y,max_y,max_x = [-1]*4
 
-        for point in self.points:
-            x = point[0]
-            y = point[1]
-            if x < min_x or min_x == -1:
-                min_x = x
-            if x > max_x or max_x == -1:
-                max_x = x
-            if y < min_y or min_y == -1:
-                min_y = y
-            if y > max_y or max_y == -1:
-                max_y = y
+        sorted_x = sorted(self.points, key=lambda x: x[0])
+        sorted_y = sorted(self.points, key=lambda x: x[1])
+
+        # take the value that means bounding box is always inside polygon 
+        min_x = sorted_x[1][0]
+        max_x = sorted_x[2][0]
+        min_y = sorted_y[1][1]
+        max_y = sorted_y[2][1]
+
+        # shift a little bit
         min_x += self.valid_area_shift
         max_x -= self.valid_area_shift
         min_y += self.valid_area_shift
         max_y -= self.valid_area_shift
+        
         new_points.append((min_x,min_y))
         new_points.append((min_x,max_y))
         new_points.append((max_x,min_y))
