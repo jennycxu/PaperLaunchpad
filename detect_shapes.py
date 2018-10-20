@@ -15,16 +15,20 @@ ret,thresh = cv2.threshold(gray,127,255,1)
 newimg,contours,h = cv2.findContours(gray,1,cv2.CHAIN_APPROX_SIMPLE)
 # ContourApproximationModes CHAIN_APPROX_SIMPLE only stores 4 of these points
  
+bounding_boxes = [] 
+
 for cnt in contours:
     approx = cv2.approxPolyDP(cnt,0.01*cv2.arcLength(cnt,True),True)
     if len(approx)==5:
-        print( "pentagon")
+        pass
+       # print( "pentagon")
        #cv2.drawContours(img,[cnt],0,255,-1)
     elif len(approx)==3:
-        print( "tri")
+        pass
+        #print( "tri")
         #cv2.drawContours(img,[cnt],0,(0,255,0),-1)
     elif len(approx)==4:
-        print( "square")
+        #print( "square")
         #cv2.drawContours(img,[cnt],0,(0,0,255),0)
         #print(approx)
         #img = cv2.rectangle(img,(approx[0][0][0],approx[0][0][1]),(approx[2][0][0],approx[2][0][1]),(0,255,0),3)
@@ -36,23 +40,31 @@ for cnt in contours:
             points.append([x,y])
             tuple_points.append((x,y))
         poly = BoundingPoly(tuple_points)
-        print(poly.get_area())
 
-        # only print if large enough
-        if(poly.is_valid_size()):
-            pts = np.array([points], np.int32)
-            pts = pts.reshape((-1,1,2))
-            img = cv2.polylines(img,[pts],True,(0,255,255),6)
-            for point in tuple_points:
-                radius = 10
-                img = cv2.circle(img,point, radius, (0,0,255), -1)
+        is_duplicate = False
+        for i in range(len(bounding_boxes)):
+            if(bounding_boxes[i].equals(poly)):
+                is_duplicate = True
+        if(is_duplicate is False):
+            bounding_boxes.append(poly)
+            # only print if large enough
+            if(poly.is_valid_size()):
+                pts = np.array([points], np.int32)
+                pts = pts.reshape((-1,1,2))
+                img = cv2.polylines(img,[pts],True,(0,255,255),6)
+                for point in tuple_points:
+                    radius = 10
+                    img = cv2.circle(img,point, radius, (0,0,255), -1)
     elif len(approx) == 9:
-        print( "half circ")
+        pass
+        #print( "half circ")
         #cv2.drawContours(img,[cnt],0,(255,255,0),-1)
     elif len(approx) > 15:
-        print( "circle")
+        pass
+       #print( "circle")
         #cv2.drawContours(img,[cnt],0,(0,255,255),-1)
- 
+
+
 cv2.imshow('img',img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
