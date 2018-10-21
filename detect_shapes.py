@@ -19,7 +19,7 @@ class ShapeDetector:
     
     def find_bounding_boxes(self,gray_img):
         #ret,thresh = cv2.threshold(gray,127,255,1)
-         
+        self.bounding_boxes = []
         #newimg,contours,h = cv2.findContours(gray,1,cv2.CHAIN_APPROX_SIMPLE)
         newimg,contours,h = cv2.findContours(gray_img,1,cv2.CHAIN_APPROX_SIMPLE)
         # ContourApproximationModes CHAIN_APPROX_SIMPLE only stores 4 of these points
