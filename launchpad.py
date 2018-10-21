@@ -27,10 +27,12 @@ class Launchpad():
 		self.box_generators = {}
 		self.is_calibrating = True
 
-		self.button_gen_mappings = {}
+		self.button_gen_mappings = []
 		self.shelter_mapping = ["shelter","drop","drop2","drop3","drop4","drop5","high A","high G"]
 		self.unforgettable_mapping = ["high A","high G", "Ab","Gb","Db","Eb","entire","drop"]
-		self.song_mappings = {"shelter":[(2,4),[1,2],self.shelter_mapping],"unforgettable":[(3,3),[1],self.unforgettable_mapping]}
+		self.daft_mapping = ["workit","doit", "harder","stronger","again","getup","getdown","build"]
+		self.overtime_mapping = ["getdown","getup", "getdownbuild","overtime","again","drop","drop2","drop3","drop4","drop5"]
+		self.song_mappings = {"s":[(2,4),[1,2],self.shelter_mapping],"u":[(3,3),[1],self.unforgettable_mapping],"d":[(4,2),[2],self.daft_mapping],"o":[(2,5),[1,2],self.overtime_mapping]}
 
 	def has_changed(self, i, j, past_frame, tolerance):
 		for x in range (i - tolerance, i + tolerance):
@@ -219,6 +221,17 @@ class Launchpad():
 			self.calibration_mode()
 		else:
 			print("HOW THE heck DID YOU GET HERE")
+
+		# Find a song
+		print("Choose a song: s - Shelter, u - Unforgettable, d - Daft Punk, o - Overtime")
+		keypress = cv2.waitKey(1) & 0xFF
+		while keypress not in [ord('s'), ord('u'), ord('d'), ord('o')]:
+			keypress = cv2.waitKey(1) & 0xFF
+		song = chr(keypress)
+		self.sections = self.song_mappings[song][0]
+		self.dimensions = self.song_mappings[song][1]
+		self.button_gen_mappings = self.song_mappings[song][2]
+		print(self.song_mappings[song])
 
 	def main(self):
 
