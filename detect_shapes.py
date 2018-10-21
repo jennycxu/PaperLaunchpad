@@ -8,8 +8,12 @@ from boundingpoly import BoundingPoly
 # https://docs.opencv.org/3.3.1/d6/d6e/group__imgproc__draw.html#ga746c0625f1781f1ffc9056259103edbc
 
 class ShapeDetector: 
-    def __init__(self):
+    def __init__(self,left,right,top,bottom):
         self.bounding_boxes = []
+        self.left = left
+        self.right = right
+        self.top = top
+        self.bottom = bottom 
     #img = cv2.imread(img)
    # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
@@ -44,7 +48,7 @@ class ShapeDetector:
                 for i in range(len(self.bounding_boxes)):
                     if(self.bounding_boxes[i].equals(poly)):
                         is_duplicate = True
-                if(is_duplicate is False and poly.is_valid_size()):
+                if(is_duplicate is False and poly.is_valid_size() and self.is_in_bounds(poly)):
                     self.bounding_boxes.append(poly)
                     # only print if large enough
                     
@@ -67,6 +71,13 @@ class ShapeDetector:
                #print( "circle")
                 #cv2.drawContours(img,[cnt],0,(0,255,255),-1)
         return self.bounding_boxes
+    #returns if in the specified bounds
+    def is_in_bounds(self,poly):
+        for row,col in poly.points: 
+            if(row < self.top or row > self.bottom or col < self.left or col > self.right):
+                return False 
+        return True
+
     def draw_bounding_box(self,top_left,bottom_right,pts,tuple_points):
         img = cv2.rectangle(img,top_left,bottom_right,(0,255,0),-1)
         img = cv2.polylines(img,[pts],True,(0,255,255),6)
@@ -76,7 +87,7 @@ class ShapeDetector:
 
 img = cv2.imread("daniel4.png")
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-sd = ShapeDetector()
+sd = ShapeDetector(100,700,100,1000)
 bounding_boxes = (sd.find_bounding_boxes(gray))
 for poly in bounding_boxes:
     print(poly)
