@@ -23,6 +23,8 @@ class Launchpad():
 		# Is given during calibration step, will tell you dimensions of the current launchpad
 		self.dimensions = None
 		self.sections = None
+		self.section_mappings = {}
+		self.box_to_section = {}
 
 		self.boxes = []
 
@@ -39,7 +41,7 @@ class Launchpad():
 
 		self.daft_mapping = ["workit","doit", "harder","stronger","again","getup","getdown","build"]
 		self.overtime_mapping = ["getdown","getup", "getdownbuild","overtime","again","drop","drop2","drop3","drop4","drop5"]
-		self.song_mappings = {"s":[(2,4),[1,2],self.shelter_mapping],"u":[(1,3),[1],self.unforgettable_mapping],"d":[(4,2),[2],self.daft_mapping],"o":[(2,5),[1,2],self.overtime_mapping]}
+		self.song_mappings = {"s":[(2,4),[1,2],self.shelter_mapping],"u":[(1,3),[1],self.unforgettable_mapping],"d":[(4,2),[0],self.daft_mapping],"o":[(2,5),[1,2],self.overtime_mapping]}
 
 	
 	def has_changed(self, i, j, past_frame, tolerance):
@@ -260,6 +262,14 @@ class Launchpad():
 
 			y_sections.append(self.boxes[left_border:])
 
+			print(y_sections)
+			for i in range(len(y_sections)):
+				self.section_mappings[i] = y_sections[i]
+				for box in y_sections[i]:
+					self.box_to_section[box] = i
+
+			print("section mappings: " + str(self.box_to_section))
+
 			sort_x = lambda y: min([x[0] for x in y])
 
 			new_y_sections = []
@@ -336,6 +346,7 @@ class Launchpad():
 		for bounding_box in self.boxes:
 			box = bounding_box.get_valid_shape()
 			touch_down = self.find_touch_vectorized(kernel_group, frames, box)
+
 
 			sound = self.box_generators[bounding_box]
 
