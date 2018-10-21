@@ -11,7 +11,7 @@ img = cv2.imread('daniel4.png')
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
  
 ret,thresh = cv2.threshold(gray,127,255,1)
- 
+print(ret)
 newimg,contours,h = cv2.findContours(gray,1,cv2.CHAIN_APPROX_SIMPLE)
 # ContourApproximationModes CHAIN_APPROX_SIMPLE only stores 4 of these points
  

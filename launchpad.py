@@ -103,7 +103,7 @@ class Launchpad():
 			ret, frame = self.cap.read()
 			# print(type(frame))
 			# print(frame.shape)
-			# gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 			# laplacian = cv2.Laplacian(gray, cv2.CV_64F)
 			# edges = cv2.Canny(gray, 100, 200)
 			# print(frame.shape)
@@ -111,19 +111,23 @@ class Launchpad():
 			edges = cv2.Canny(frame, 100, 200)/255
 			current_frame = edges
 
-			hard_code = [(300, 520), (400, 520), (300, 670),(400, 670)]
-			for i, j in hard_code:
-				for x in range(-5, 6):
-					for y in range(-5, 6):
-						edges[i + x][j+ y] = 100
+			# hard_code = [(300, 520), (400, 520), (300, 670),(400, 670)]
+			# for i, j in hard_code:
+			# 	for x in range(-5, 6):
+			# 		for y in range(-5, 6):
+			# 			edges[i + x][j+ y] = 100
 
-			box = [(330, 570), (370, 570), (330, 620),(370, 620)]
+			# box = [(330, 570), (370, 570), (330, 620),(370, 620)]
+
+			boxes = JENNY_FUNCTION_CALL(frame)
 
 			kernel = [[1 for x in range(10)] for y in range(2)]
 			threshold = 6
 			kernel_group = (kernel, threshold)
 			frames = (current_frame, past1_frame, past2_frame)
 
+			
+			
 			val = self.find_touch(kernel_group, frames, box)
 			if val:
 				count += 1
