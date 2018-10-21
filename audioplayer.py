@@ -7,6 +7,8 @@ from common.wavegen import *
 from common.wavesrc import *
 from launchpad import Launchpad
 
+import time
+
 # Main app
 class MainWidget(BaseWidget) :
     def __init__(self):
@@ -41,6 +43,8 @@ class MainWidget(BaseWidget) :
         
 
         self.L = Launchpad(self.play_audio)
+        # print('HI THERE\n HI THERE')
+        self.L.calibration_mode()
 
     def play_audio(self, index):
         print("PLAY THIS AUDIO " , index)
@@ -50,7 +54,12 @@ class MainWidget(BaseWidget) :
 
     def on_update(self) :
         self.audio.on_update()
-        self.L.main()
+        
+        # print(self.L.is_calibrating)
+        if self.L.is_calibrating:
+            pass
+        else:
+            self.L.main()
 
     def on_key_down(self,keycode,modifier):
         if(keycode[1] == 'c'):
