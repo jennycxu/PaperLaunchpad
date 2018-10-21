@@ -343,19 +343,33 @@ class Launchpad():
 		# print("========== END BOXES =======")
 
 
+		sections_being_played = defaultdict(list)
+
 		for bounding_box in self.boxes:
 			box = bounding_box.get_valid_shape()
 			touch_down = self.find_touch_vectorized(kernel_group, frames, box)
 
+			if touch_down:
+				# print("count: " + str(self.count))
+				# print(touch_down)
+				# print('box: ' + str(box))
 
-			sound = self.box_generators[bounding_box]
+				sections_being_played[self.box_to_section[bounding_box]].append(bounding_box)
 
-			# Represents the last frame this box was touched
-			state = self.box_state[bounding_box]
+		for section in sections_being_played:
+			sounds = sections_being_played[section]
+			print(sounds)
+			if sounds:
+				bounding_box = max(sounds, key=lambda x: x.get_valid_shape()[0][0])
+				print("this is the box: " + str(bounding_box))
 
-			if sound:
+				sound = self.box_generators[bounding_box]
+
+				# Represents the last frame this box was touched
+				state = self.box_state[bounding_box]
+
 				# If its a touch down, need to see if it's still a residual from current press or a new press
-				if touch_down:
+				if sound:
 					if self.count - state < self.press_threshold:
 						pass # do nothing
 					else:
@@ -363,18 +377,7 @@ class Launchpad():
 						self.box_state[bounding_box] = self.count
 						self.audio.play_audio(sound)
 
-			# else:
-			# 	if state:
-			# 		self.box_state[bounding_box] = False # equivalent to releasing the button
-			# 	else:
-			# 		pass # do nothing, equivalent to still being afloat
-
-
-			if touch_down:
-				print("count: " + str(self.count))
-				print(touch_down)
-				print('box: ' + str(box))
-
+			
 
 		# t = time.time()
 		# box = [(320, 777), (407, 777), (320, 874), (407, 874)]
