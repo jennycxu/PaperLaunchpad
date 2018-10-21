@@ -18,37 +18,32 @@ class MainWidget(BaseWidget) :
 
         self.audio.set_generator(self.mixer)
 
+        keys = ["shelter","workit","harder","doit","stronger","drop"]
         self.songs = {}
-        self.songs["shelter"] = WaveFile("data/shelter.wav")
-        self.songs["workit"] = WaveFile("data/workit.wav")
-        self.songs["harder"]  = WaveFile("data/harder.wav")
-        self.songs["doit"] = WaveFile("data/doit.wav")
-        self.songs["stronger"] = WaveFile("data/stronger.wav")
+        for key in keys:
+            self.songs[key] = WaveFile("data/" + key + ".wav")
 
         self.shelter_gen = WaveGenerator(self.songs['shelter'],True)
         self.workit_gen = WaveGenerator(self.songs['workit'])
         self.doit_gen = WaveGenerator(self.songs['doit'])
         self.harder_gen = WaveGenerator(self.songs['harder'])
         self.stronger_gen = WaveGenerator(self.songs['stronger'])
+        self.drop_gen = WaveGenerator(self.songs['drop'],True)
+
+        self.gens = []
+        self.gens.append(self.shelter_gen)
+        self.gens.append(self.workit_gen)
+        self.gens.append(self.doit_gen)
+        self.gens.append(self.harder_gen)
+        self.gens.append(self.stronger_gen)
+        self.gens.append(self.drop_gen)
 
         self.launchpad = {}
-        self.launchpad["shelter"] = self.shelter_gen
-        self.launchpad["workit"] = self.workit_gen
-        self.launchpad["harder"]  = self.harder_gen
-        self.launchpad["doit"] = self.doit_gen
-        self.launchpad["stronger"] = self.stronger_gen
-
-        self.mixer.add(self.shelter_gen)
-        self.mixer.add(self.harder_gen)
-        self.mixer.add(self.stronger_gen)
-        self.mixer.add(self.workit_gen)
-        self.mixer.add(self.doit_gen)
-        self.workit_gen.pause()
-        self.shelter_gen.pause()
-        self.doit_gen.pause()
-        self.harder_gen.pause()
-        self.stronger_gen.pause()
+        for i in range(len(self.gens)): 
+            self.launchpad[keys[i]] = self.gens[i]
         
+            self.mixer.add(self.gens[i])
+            self.gens[i].pause()
 
         self.L = Launchpad(self)
         # print('HI THERE\n HI THERE')
@@ -91,7 +86,7 @@ class MainWidget(BaseWidget) :
         elif(keycode[1] == 'a'):
             self.play_audio("workit")
         elif(keycode[1] == 's'):
-            self.play_audio("doit")
+            self.play_audio("drop")
             
 
 
