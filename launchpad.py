@@ -8,6 +8,10 @@ class Launchpad():
 	def __init__(self):
 		self.cap = cv2.VideoCapture(0)
 		self.shape_detector = ShapeDetector(50, 1200, 100, 700)
+		self.past1_frame = np.zeros((720,1080))
+		self.past2_frame = np.zeros((720,1080))
+		self.count = 0
+
 
 	def has_changed(self, i, j, past_frame, tolerance):
 		for x in range (i - tolerance, i + tolerance):
@@ -124,72 +128,56 @@ class Launchpad():
 
 	def main(self):
 		# past_frame = np.zeros((720,1080))
+		t = time.time()
+		ret, frame = self.cap.read()
+		print("checkpoint 1", str(time.time() - t))
 
-		past1_frame = np.zeros((720,1080))
-		past2_frame = np.zeros((720,1080))
-		count = 0
+		t = time.time()
+		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+		print("checkpoint 2", str(time.time() - t))
 
-		while True:
-			t = time.time()
-			ret, frame = self.cap.read()
-			print("checkpoint 1", str(time.time() - t))
+		edges = cv2.Canny(frame, 100, 200)				
+	
+		boxes = self.shape_detector.find_bounding_boxes(edges)
 
-			t = time.time()
-			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-			print("checkpoint 2", str(time.time() - t))
+		current_frame = edges/255
 
-			edges = cv2.Canny(frame, 100, 200)				
+		box = [(330, 570), (370, 570), (330, 620),(370, 620)]
+		self.draw_hard_code(box, current_frame)
 		
-			boxes = self.shape_detector.find_bounding_boxes(edges)
+		self.draw_shape_detector_box(current_frame)
 
-			current_frame = edges/255
+		print("========= BOXeS ==========")
+		for poly in boxes:
+			print(poly)
+			print("\n")
+			for i, j in poly.points:
+				for x in range(-5, 6):
+					for y in range(-5, 6):
+						current_frame[i + x][j+ y] = 1
+		print("========== END BOXES =======")
 
-			box = [(330, 570), (370, 570), (330, 620),(370, 620)]
-			self.draw_hard_code(box, current_frame)
-			
-			self.draw_shape_detector_box(current_frame)
+		kernel = [[1 for x in range(10)] for y in range(2)]
+		threshold = 6
+		kernel_group = (kernel, threshold)
+		frames = (current_frame, self.past1_frame, self.past2_frame)
 
-			print("========= BOXeS ==========")
-			for poly in boxes:
-				print(poly)
-				print("\n")
-				for i, j in poly.points:
-					for x in range(-5, 6):
-						for y in range(-5, 6):
-							current_frame[i + x][j+ y] = 1
-			print("========== END BOXES =======")
+		# val = self.find_touch(kernel_group, frames, box)
+		# if val:
+		# 	self.count += 1
+		# 	print("self.count: " + str(self.count))
+		# 	print(val)
 
-			kernel = [[1 for x in range(10)] for y in range(2)]
-			threshold = 6
-			kernel_group = (kernel, threshold)
-			frames = (current_frame, past1_frame, past2_frame)
+		# print_lowest_i(edges)
+		# print_lowest_j(edges)
+		
+		cv2.imshow('current frame', current_frame)
 
-			# val = self.find_touch(kernel_group, frames, box)
-			# if val:
-			# 	count += 1
-			# 	print("count: " + str(count))
-			# 	print(val)
+		
+		self.past2_frame, self.past1_frame = self.past1_frame, current_frame
 
-			# print_lowest_i(edges)
-			# print_lowest_j(edges)
-			
-			cv2.imshow('current frame', current_frame)
 
-			keypress = cv2.waitKey(1) & 0xFF
-			if keypress == ord('q'):
-				break
-
-			elif keypress == ord('c'):
-				self.calibration_mode()
-
-			# past_frame = current_frame
-
-			past2_frame, past1_frame = past1_frame, current_frame
-
-		self.cap.release()
-		cv2.destroyAllWindows()
-
-L = Launchpad()
+#L = Launchpad()
 
 
 # Initial change detection code (only detects diference between current frame and previous frame)
@@ -225,4 +213,4 @@ L = Launchpad()
 # print(L.find_touch(kernel_group, frames, box), L.find_touch(kernel_group, frames2, box))
 
 
-L.main()
+#L.main()
