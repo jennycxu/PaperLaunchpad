@@ -6,15 +6,17 @@ from scipy import ndimage
 
 class Launchpad():
 
-	def __init__(self, callback):
+	def __init__(self, audio):
 		self.cap = cv2.VideoCapture(0)
 		self.shape_detector = ShapeDetector(50, 1200, 100, 700)
 		self.past1_frame = np.zeros((720,1080))
 		self.past2_frame = np.zeros((720,1080))
 		self.count = 0
-		self.callback = callback
+		self.audio = audio
 		self.boxes = []
 		self.is_calibrating = True
+		self.button_gen_mappings = {}
+		self.default_gen_mapping = {"1":"doit","2":"workit","3":"harder","4":"shelter"}
 
 	def has_changed(self, i, j, past_frame, tolerance):
 		for x in range (i - tolerance, i + tolerance):

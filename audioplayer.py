@@ -17,39 +17,61 @@ class MainWidget(BaseWidget) :
         self.mixer = Mixer()
 
         self.audio.set_generator(self.mixer)
-        self.wave_file_gen = WaveGenerator(WaveFile("data/shelter.wav"))
-        self.drum_loop = WaveGenerator(WaveFile("data/drumloop.wav"),True)
-        self.kick_loop = WaveGenerator(WaveFile("data/kick.wav"))
-        self.tune_loop = WaveGenerator(WaveFile("data/tune.wav"))
-        self.snare_loop = WaveGenerator(WaveFile("data/snare.wav"))
 
-        self.launchpad = []
-        self.launchpad.append(self.wave_file_gen)
-        self.launchpad.append(self.drum_loop)
-        self.launchpad.append(self.kick_loop)
-        self.launchpad.append(self.tune_loop)
-        self.launchpad.append(self.snare_loop)
+        self.songs = {}
+        self.songs["shelter"] = WaveFile("data/shelter.wav")
+        self.songs["workit"] = WaveFile("data/workit.wav")
+        self.songs["harder"]  = WaveFile("data/harder.wav")
+        self.songs["doit"] = WaveFile("data/doit.wav")
+        self.songs["stronger"] = WaveFile("data/stronger.wav")
 
-        self.mixer.add(self.wave_file_gen)
-        self.mixer.add(self.tune_loop)
-        self.mixer.add(self.snare_loop)
-        self.mixer.add(self.drum_loop)
-        self.mixer.add(self.kick_loop)
-        self.drum_loop.play()
-        self.wave_file_gen.pause()
-        self.kick_loop.play()
-        self.tune_loop.play()
-        self.snare_loop.play()
+        self.shelter_gen = WaveGenerator(self.songs['shelter'],True)
+        self.workit_gen = WaveGenerator(self.songs['workit'])
+        self.doit_gen = WaveGenerator(self.songs['doit'])
+        self.harder_gen = WaveGenerator(self.songs['harder'])
+        self.stronger_gen = WaveGenerator(self.songs['stronger'])
+
+        self.launchpad = {}
+        self.launchpad["shelter"] = self.shelter_gen
+        self.launchpad["workit"] = self.workit_gen
+        self.launchpad["harder"]  = self.harder_gen
+        self.launchpad["doit"] = self.doit_gen
+        self.launchpad["stronger"] = self.stronger_gen
+
+        self.mixer.add(self.shelter_gen)
+        self.mixer.add(self.harder_gen)
+        self.mixer.add(self.stronger_gen)
+        self.mixer.add(self.workit_gen)
+        self.mixer.add(self.doit_gen)
+        self.workit_gen.pause()
+        self.shelter_gen.pause()
+        self.doit_gen.pause()
+        self.harder_gen.pause()
+        self.stronger_gen.pause()
         
 
-        self.L = Launchpad(self.play_audio)
+        self.L = Launchpad(self)
         # print('HI THERE\n HI THERE')
         self.L.calibration_mode()
+    # in the case that this a note that hasn't played yet 
+    def reset_audio(self,key):
+        #make a new instance 
+        self.launchpad[key] = WaveGenerator(self.songs[key])
 
-    def play_audio(self, index):
-        print("PLAY THIS AUDIO " , index)
-        if(index == 1):
-            self.launchpad[1].play_toggle()
+    def play_audio(self, key):
+        print("PLAY THIS AUDIO " , key, " and exists: ",key in self.launchpad.keys())
+        if(key in self.launchpad.keys()):
+            if(self.launchpad[key].loop):
+                self.launchpad[key].play_toggle()
+            else:
+                self.reset_audio(key)
+                self.launchpad[key].play()
+                self.mixer.add(self.launchpad[key])
+    def is_loop(self,key):
+        if(key in self.launchpad.keys()):
+            if(self.launchpad[key].loop):
+                return True
+        return False 
         
 
     def on_update(self) :
@@ -67,9 +89,9 @@ class MainWidget(BaseWidget) :
         elif(keycode[1] == 'q'):
             raise SystemExit
         elif(keycode[1] == 'a'):
-            self.play_audio(1)
+            self.play_audio("workit")
         elif(keycode[1] == 's'):
-            self.play_audio(2)
+            self.play_audio("doit")
             
 
 
