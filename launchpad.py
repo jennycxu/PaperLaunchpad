@@ -5,12 +5,13 @@ import time
 
 class Launchpad():
 
-	def __init__(self):
+	def __init__(self, callback):
 		self.cap = cv2.VideoCapture(0)
 		self.shape_detector = ShapeDetector(50, 1200, 100, 700)
 		self.past1_frame = np.zeros((720,1080))
 		self.past2_frame = np.zeros((720,1080))
 		self.count = 0
+		self.callback = callback
 
 
 	def has_changed(self, i, j, past_frame, tolerance):

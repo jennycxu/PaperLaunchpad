@@ -19,8 +19,10 @@ class MainWidget(BaseWidget) :
         self.wave_file_gen.play()
         self.mixer.add(self.wave_file_gen)
 
-        self.L = Launchpad()
-        #self.L.main()
+        self.L = Launchpad(self.play_audio)
+
+    def play_audio(self, index):
+        print("PLAY THIS AUDIO " , index)
 
     def on_update(self) :
         self.audio.on_update()
@@ -28,7 +30,7 @@ class MainWidget(BaseWidget) :
 
     def on_key_down(self,keycode,modifier):
         if(keycode[1] == 'c'):
-            L.calibration_mode()
+            self.L.calibration_mode()
         elif(keycode[1] == 'q'):
             raise SystemExit
 
