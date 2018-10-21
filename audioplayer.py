@@ -16,13 +16,37 @@ class MainWidget(BaseWidget) :
 
         self.audio.set_generator(self.mixer)
         self.wave_file_gen = WaveGenerator(WaveFile("data/shelter.wav"))
-        self.wave_file_gen.play()
+        self.drum_loop = WaveGenerator(WaveFile("data/drumloop.wav"),True)
+        self.kick_loop = WaveGenerator(WaveFile("data/kick.wav"))
+        self.tune_loop = WaveGenerator(WaveFile("data/tune.wav"))
+        self.snare_loop = WaveGenerator(WaveFile("data/snare.wav"))
+
+        self.launchpad = []
+        self.launchpad.append(self.wave_file_gen)
+        self.launchpad.append(self.drum_loop)
+        self.launchpad.append(self.kick_loop)
+        self.launchpad.append(self.tune_loop)
+        self.launchpad.append(self.snare_loop)
+
         self.mixer.add(self.wave_file_gen)
+        self.mixer.add(self.tune_loop)
+        self.mixer.add(self.snare_loop)
+        self.mixer.add(self.drum_loop)
+        self.mixer.add(self.kick_loop)
+        self.drum_loop.play()
+        self.wave_file_gen.pause()
+        self.kick_loop.play()
+        self.tune_loop.play()
+        self.snare_loop.play()
+        
 
         self.L = Launchpad(self.play_audio)
 
     def play_audio(self, index):
         print("PLAY THIS AUDIO " , index)
+        if(index == 1):
+            self.launchpad[1].play_toggle()
+        
 
     def on_update(self) :
         self.audio.on_update()
@@ -33,5 +57,11 @@ class MainWidget(BaseWidget) :
             self.L.calibration_mode()
         elif(keycode[1] == 'q'):
             raise SystemExit
+        elif(keycode[1] == 'a'):
+            self.play_audio(1)
+        elif(keycode[1] == 's'):
+            self.play_audio(2)
+            
+
 
 run(MainWidget)
