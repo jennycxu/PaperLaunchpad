@@ -39,9 +39,10 @@ class Launchpad():
 		# self.unforgettable_mapping = ["high A","high G", "Ab","Gb","Db","Eb","entire","drop"]
 		self.unforgettable_mapping = ["high A","high G", "entire"]
 
+		self.gucci_mapping = ['oo', 'yeuh', 'goochi', 'blurp', 'lulpump', 'gchgang']
 		self.daft_mapping = ["workit","doit", "harder","stronger","again","getup","getdown","build"]
 		self.overtime_mapping = ["getdown","getup", "getdownbuild","overtime","again","drop","drop2","drop3","drop4","drop5"]
-		self.song_mappings = {"s":[(2,4),[1,2],self.shelter_mapping],"u":[(1,3),[1],self.unforgettable_mapping],"d":[(4,2),[0],self.daft_mapping],"o":[(2,5),[1,2],self.overtime_mapping]}
+		self.song_mappings = {"g": [(2, 3), [2], self.gucci_mapping], "s":[(2,4),[1,2],self.shelter_mapping],"u":[(1,3),[1],self.unforgettable_mapping],"d":[(4,2),[0],self.daft_mapping],"o":[(2,5),[1,2],self.overtime_mapping]}
 
 	
 	def has_changed(self, i, j, past_frame, tolerance):
@@ -158,21 +159,23 @@ class Launchpad():
 		values =  np.where(convolution > threshold)
 
 		if values[0].size > 0:
-			print(box)
-			print(top + values[0][0], left + values[1][0])
+			# print(box)
+			# print(top + values[0][0], left + values[1][0])
 			if self.check_past_frames(kernel_group, past_frames, (top + values[0][0], left + values[1][0])):
 				return top + values[0][0], left + values[1][0]
 			else:
-				print('yup I  faILED')
+				print("Ephemeral kind of finger")
 		
 		return None
 
-	def draw_hard_code(self, box, current_frame):
+	def draw_hard_code(self, box, current_frame, reverse=False):
 		for i, j in box:
 			for x in range(-5, 6):
 				for y in range(-5, 6):
-					current_frame[i + x][j+ y] = 1
-
+					if not reverse:
+						current_frame[i + x][j+ y] = 1
+					else:
+						current_frame[i + x][j+ y] = 0
 		
 	def draw_shape_detector_box(self,current_frame):
 		for i in (self.shape_detector.top, self.shape_detector.bottom):
@@ -238,58 +241,63 @@ class Launchpad():
 			self.audio.reset()
 
 			# Find a song
-			print("Choose a song: s - Shelter, u - Unforgettable, d - Daft Punk, o - Overtime")
+			print("Choose a song: s - Shelter, u - Unforgettable, d - Daft Punk, o - Overtime, g - Gucci Gang m = Manual Input")
 			keypress = cv2.waitKey(1) & 0xFF
-			while keypress not in [ord('s'), ord('u'), ord('d'), ord('o')]:
+			while keypress not in [ord('s'), ord('u'), ord('d'), ord('o'), ord('g'), ord('m')]:
 				keypress = cv2.waitKey(1) & 0xFF
-			song = chr(keypress)
 
-			self.sections = self.song_mappings[song][1]
-			self.dimensions = self.song_mappings[song][0]
-			self.button_gen_mappings = self.song_mappings[song][2]
+			if keypress in [ord('s'), ord('u'), ord('d'), ord('o'), ord('g')]:
+				song = chr(keypress)
 
-			print(self.song_mappings[song])
+				self.sections = self.song_mappings[song][1]
+				self.dimensions = self.song_mappings[song][0]
+				self.button_gen_mappings = self.song_mappings[song][2]
 
-			sort_y = lambda y: min([x[1] for x in y])
-			self.boxes = sorted(self.boxes, key=lambda x: sort_y(x.get_valid_shape()))
+				print(self.song_mappings[song])
 
-			y_sections = []
+				sort_y = lambda y: min([x[1] for x in y])
+				self.boxes = sorted(self.boxes, key=lambda x: sort_y(x.get_valid_shape()))
 
-			left_border = 0
-			for right in self.sections:
-				y_sections.append(self.boxes[left_border: (right + 1)*self.dimensions[0]])
-				left_border = (right + 1)*self.dimensions[0]
+				y_sections = []
 
-			y_sections.append(self.boxes[left_border:])
+				left_border = 0
+				for right in self.sections:
+					y_sections.append(self.boxes[left_border: (right + 1)*self.dimensions[0]])
+					left_border = (right + 1)*self.dimensions[0]
 
-			print(y_sections)
-			for i in range(len(y_sections)):
-				self.section_mappings[i] = y_sections[i]
-				for box in y_sections[i]:
-					self.box_to_section[box] = i
+				y_sections.append(self.boxes[left_border:])
 
-			print("section mappings: " + str(self.box_to_section))
+				# print(y_sections)
+				for i in range(len(y_sections)):
+					self.section_mappings[i] = y_sections[i]
+					for box in y_sections[i]:
+						self.box_to_section[box] = i
 
-			sort_x = lambda y: min([x[0] for x in y])
+				# print("section mappings: " + str(self.box_to_section))
 
-			new_y_sections = []
-			for i in range(self.dimensions[1]):
-				eles = self.boxes[ i*self.dimensions[0] : (i+1)*self.dimensions[0]]
-				col = sorted(eles, key = lambda x: sort_x(x.get_valid_shape()) )
-				new_y_sections.extend(col)
+				sort_x = lambda y: min([x[0] for x in y])
 
-			self.boxes = new_y_sections
+				new_y_sections = []
+				for i in range(self.dimensions[1]):
+					eles = self.boxes[ i*self.dimensions[0] : (i+1)*self.dimensions[0]]
+					col = sorted(eles, key = lambda x: sort_x(x.get_valid_shape()) )
+					new_y_sections.extend(col)
 
-			print([box.get_valid_shape() for box in self.boxes])
+				self.boxes = new_y_sections
 
-			for i in range(len(self.boxes)):
-				box = self.boxes[i]
-				self.box_generators[box] = self.button_gen_mappings[i]
+				# print([box.get_valid_shape() for box in self.boxes])
+
+				for i in range(len(self.boxes)):
+					box = self.boxes[i]
+					self.box_generators[box] = self.button_gen_mappings[i]
+
+			else:
+				pass
 
 		elif keypress == ord('n'):
 			self.calibration_mode()
 		else:
-			print("HOW THE heck DID YOU GET HERE")
+			print("you should not be here!!")
 
 		
 
@@ -358,10 +366,10 @@ class Launchpad():
 
 		for section in sections_being_played:
 			sounds = sections_being_played[section]
-			print(sounds)
+			# print(sounds)
 			if sounds:
 				bounding_box = max(sounds, key=lambda x: x.get_valid_shape()[0][0])
-				print("this is the box: " + str(bounding_box))
+				# print("this is the box: " + str(bounding_box))
 
 				sound = self.box_generators[bounding_box]
 
@@ -373,7 +381,7 @@ class Launchpad():
 					if self.count - state < self.press_threshold:
 						pass # do nothing
 					else:
-						print("YEAH IM GETTING PRESSED")
+						# print("YEAH IM GETTING PRESSED")
 						self.box_state[bounding_box] = self.count
 						self.audio.play_audio(sound)
 

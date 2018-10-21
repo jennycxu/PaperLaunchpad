@@ -22,22 +22,30 @@ class MainWidget(BaseWidget) :
         # Initialize and create all the wave buffers from the regions 
         self.wave_buffers = make_wave_buffers("data/unforgettable_regions.txt","data/unforgettable_beat.wav")
 
-        keys = ["shelter","workit","harder","doit","stronger","drop","drop2","drop3","drop4","drop5","getdown","getdownbuild","getup","overtime","again","build","high A","high G","Ab","Gb","Db","Eb","entire"]
+        keys = ["shelter","workit","harder","doit","stronger","drop","drop2","drop3","drop4","drop5","getdown","getdownbuild","getup","overtime","again","build","high A","high G","Ab","Gb","Db","Eb","entire", "oo", "blurp", "goochi", "lulpump", "yeuh", "gchgang"]
         self.songs = {}
         for key in keys:
             if os.path.exists("data/" + key + ".wav") is True:
                 self.songs[key] = WaveFile("data/" + key + ".wav")
 
          # Initialize and create all the wave buffers from the regions 
-        self.wave_buffers = make_wave_buffers("data/unforgettable_regions.txt","data/unforgettable_beat.wav")
+        self.wave_buffers2 = make_wave_buffers("data/gucci_gang_regions.txt","data/gucci_gang.wav")
+
 
         self.songs["high A"] = self.wave_buffers["high A"]
         self.songs["high G"] = self.wave_buffers["high G"]
-        self.songs["Gb"] = self.wave_buffers["Ab"]
-        self.songs["Db"] = self.wave_buffers["Gb"]
-        self.songs["Eb"] = self.wave_buffers["Db"]
-        self.songs["high A"] = self.wave_buffers["Eb"]
-        self.songs["high A"] = self.wave_buffers["entire"]
+        self.songs["Ab"] = self.wave_buffers["Ab"]
+        self.songs["Gb"] = self.wave_buffers["Gb"]
+        self.songs["Db"] = self.wave_buffers["Db"]
+        self.songs["Eb"] = self.wave_buffers["Eb"]
+        self.songs["entire"] = self.wave_buffers["entire"]
+
+        self.songs["oo"] = self.wave_buffers2["oo"]
+        self.songs["blurp"] = self.wave_buffers2["blurp"]
+        self.songs["goochi"] = self.wave_buffers2["goochi"]
+        self.songs["lulpump"] = self.wave_buffers2["lulpump"]
+        self.songs["yeuh"] = self.wave_buffers2["yeuh"]
+        self.songs["gchgang"] = self.wave_buffers2["gchgang"]
 
 
         self.shelter_gen = WaveGenerator(self.songs['shelter'],True)
@@ -67,6 +75,13 @@ class MainWidget(BaseWidget) :
         self.db_gen = WaveGenerator(self.wave_buffers["Db"],True)
         self.eb_gen = WaveGenerator(self.wave_buffers["Eb"],True)
         self.entire_gen = WaveGenerator(self.wave_buffers["entire"],True)
+
+        self.oo_gen = WaveGenerator(self.wave_buffers2["oo"])
+        self.blurp_gen = WaveGenerator(self.wave_buffers2["blurp"])
+        self.gooch_gen = WaveGenerator(self.wave_buffers2["goochi"])
+        self.lulpump_gen = WaveGenerator(self.wave_buffers2["lulpump"])
+        self.yeh_gen = WaveGenerator(self.wave_buffers2["yeuh"])
+        self.gucci_gang_gen = WaveGenerator(self.wave_buffers2["gchgang"], True)
         
 
         self.gens = []
@@ -93,6 +108,12 @@ class MainWidget(BaseWidget) :
         self.gens.append(self.db_gen)
         self.gens.append(self.eb_gen)
         self.gens.append(self.entire_gen)
+        self.gens.append(self.oo_gen)
+        self.gens.append(self.blurp_gen)
+        self.gens.append(self.gooch_gen)
+        self.gens.append(self.lulpump_gen)
+        self.gens.append(self.yeh_gen)
+        self.gens.append(self.gucci_gang_gen)
 
         self.launchpad = {}
         for i in range(len(self.gens)): 
