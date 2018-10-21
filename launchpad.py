@@ -1,8 +1,11 @@
 import cv2
 import numpy as np 
-from detect_shapes import ShapeDetector
-import time
 from scipy import ndimage
+
+from collections import defaultdict
+import time
+from detect_shapes import ShapeDetector
+
 
 class Launchpad():
 
@@ -19,16 +22,24 @@ class Launchpad():
 
 		# Is given during calibration step, will tell you dimensions of the current launchpad
 		self.dimensions = None
+		self.sections = None
 
 		self.boxes = []
 
 		# Tells you if a box is currently pressed or off
 		self.box_state = {}
-		self.box_generators = {}
+		self.box_generators = defaultdict(str)
 		self.is_calibrating = True
 
 		self.button_gen_mappings = {}
 		self.default_gen_mapping = {"1":"doit","2":"workit","3":"harder","4":"shelter"}
+
+
+	def set_dimensions(dims):
+		self.dimensions = dims
+
+	def set_sections(sections):
+		pass
 
 	def has_changed(self, i, j, past_frame, tolerance):
 		for x in range (i - tolerance, i + tolerance):
@@ -212,7 +223,18 @@ class Launchpad():
 			for box in self.boxes:
 				self.box_state[box] = False
 
+			for i in range(8):
+				self.box_generators[self.boxes[i]] = ['shelter', 'doit', 'workit', 'harder', 'stronger', 'drop', 'drop2', 'drop3'][i]
+			# self.box_generators[self.boxes[0]] = 'doit'
+			# self.box_generators[self.boxes[1]] = 'workit'
+
 			self.is_calibrating = False
+
+			self.audio.reset()
+
+			
+
+
 		elif keypress == ord('n'):
 			self.calibration_mode()
 		else:
@@ -249,7 +271,8 @@ class Launchpad():
 		np_kernel = np.ones((3,10))
 		threshold = 6
 		kernel_group = (np_kernel, threshold)
-		frames = (current_frame, self.past1_frame, self.past2_frame)
+		# frames = (current_frame, self.past1_frame, self.past2_frame)
+		frames = (current_frame, self.past1_frame)
 
 
 		# print("========= BOXeS ==========")
@@ -271,21 +294,20 @@ class Launchpad():
 			box = bounding_box.get_valid_shape()
 			touch_down = self.find_touch_vectorized(kernel_group, frames, box)
 
-			# sound = self.box_generators[bounding_box]
+			sound = self.box_generators[bounding_box]
 
 			# Represents the last frame this box was touched
 			state = self.box_state[bounding_box]
 
-			# if self.audio.is_loop(sound):
-
-			# If its a touch down, need to see if it's still a residual from current press or a new press
-			if touch_down:
-				if self.count - state < self.press_threshold:
-					pass # do nothing
-				else:
-					print("YEAH IM GETTING PRESSED")
-					self.box_state[bounding_box] = self.count
-					self.audio.play_audio('drop5')
+			if sound:
+				# If its a touch down, need to see if it's still a residual from current press or a new press
+				if touch_down:
+					if self.count - state < self.press_threshold:
+						pass # do nothing
+					else:
+						print("YEAH IM GETTING PRESSED")
+						self.box_state[bounding_box] = self.count
+						self.audio.play_audio(sound)
 
 			# else:
 			# 	if state:

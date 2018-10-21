@@ -17,7 +17,6 @@ Interesting finds:
 
 
 TODO;
-toggle
 add sections into the board
 take the lowest button in a section as the actual one being pressed
 
