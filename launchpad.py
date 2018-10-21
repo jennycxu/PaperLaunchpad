@@ -15,7 +15,7 @@ class Launchpad():
 		self.audio = audio
 
 		# number of frames from the last press
-		self.press_threshold = 25
+		self.press_threshold = 15
 
 		# Is given during calibration step, will tell you dimensions of the current launchpad
 		self.dimensions = None
@@ -267,7 +267,7 @@ class Launchpad():
 		# print("========== END BOXES =======")
 
 
-		for bounding_box in [self.boxes[0]]:
+		for bounding_box in self.boxes:
 			box = bounding_box.get_valid_shape()
 			touch_down = self.find_touch_vectorized(kernel_group, frames, box)
 
@@ -285,7 +285,7 @@ class Launchpad():
 				else:
 					print("YEAH IM GETTING PRESSED")
 					self.box_state[bounding_box] = self.count
-					self.audio.play_audio('doit')
+					self.audio.play_audio('drop5')
 
 			# else:
 			# 	if state:
