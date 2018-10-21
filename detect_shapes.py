@@ -88,13 +88,13 @@ class ShapeDetector:
             img = cv2.circle(img,point, radius, (0,0,255), -1)
 
 
-img = cv2.imread("daniel4.png")
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-sd = ShapeDetector(100,700,100,1000)
-bounding_boxes = (sd.find_bounding_boxes(gray))
-for poly in bounding_boxes:
-    print(poly)
-    print("\n")
+# img = cv2.imread("daniel4.png")
+# gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+# sd = ShapeDetector(100,700,100,1000)
+# bounding_boxes = (sd.find_bounding_boxes(gray))
+# for poly in bounding_boxes:
+#     print(poly)
+#     print("\n")
 
 #cv2.imshow('img',img)
 #cv2.waitKey(0)

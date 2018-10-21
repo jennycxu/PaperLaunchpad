@@ -130,9 +130,9 @@ class Launchpad():
 		count = 0
 
 		while True:
-			# t = time.time()
+			t = time.time()
 			ret, frame = self.cap.read()
-			# print("checkpoint 1", str(time.time() - t))
+			print("checkpoint 1", str(time.time() - t))
 
 			# t = time.time()
 			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -155,13 +155,13 @@ class Launchpad():
 			# self.draw_shape_detector_box(current_frame)
 
 			# print("========= BOXeS ==========")
-			# for poly in boxes:
-			# 	print(poly)
-			# 	print("\n")
-			# 	for i, j in poly.get_valid_shape():
-			# 		for x in range(-5, 6):
-			# 			for y in range(-5, 6):
-			# 				current_frame[i + x][j+ y] = 1
+			for poly in boxes:
+				print(poly)
+				print("\n")
+				for i, j in poly.get_valid_shape():
+					for x in range(-5, 6):
+						for y in range(-5, 6):
+							current_frame[i + x][j+ y] = 1
 			# print("========== END BOXES =======")
 
 			# print("checkpoint 5", str(time.time() - t))
@@ -186,11 +186,11 @@ class Launchpad():
 			# print("checkpoint 6", str(time.time() - t))
 
 			keypress = cv2.waitKey(1) & 0xFF
-			if keypress == ord('q'):
-				break
+			# if keypress == ord('q'):
+			# 	break
 
-			elif keypress == ord('c'):
-				self.calibration_mode()
+			# elif keypress == ord('c'):
+			# 	self.calibration_mode()
 
 			# past_frame = current_frame
 

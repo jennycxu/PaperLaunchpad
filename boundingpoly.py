@@ -42,8 +42,9 @@ class BoundingPoly :
         max_y -= self.valid_area_shift
         
         new_points.append((min_x,min_y))
-        new_points.append((min_x,max_y))
+        
         new_points.append((max_x,min_y))
+        new_points.append((min_x,max_y))
         new_points.append((max_x,max_y))
         return new_points
     def __str__(self):
