@@ -18,37 +18,52 @@ class MainWidget(BaseWidget) :
 
         self.audio.set_generator(self.mixer)
 
+        keys = ["shelter","workit","harder","doit","stronger","drop","drop2","drop3","drop4","drop5","getdown","getdownbuild","getup","overtime","again","build"]
         self.songs = {}
-        self.songs["shelter"] = WaveFile("data/shelter.wav")
-        self.songs["workit"] = WaveFile("data/workit.wav")
-        self.songs["harder"]  = WaveFile("data/harder.wav")
-        self.songs["doit"] = WaveFile("data/doit.wav")
-        self.songs["stronger"] = WaveFile("data/stronger.wav")
+        for key in keys:
+            self.songs[key] = WaveFile("data/" + key + ".wav")
 
         self.shelter_gen = WaveGenerator(self.songs['shelter'],True)
         self.workit_gen = WaveGenerator(self.songs['workit'])
         self.doit_gen = WaveGenerator(self.songs['doit'])
         self.harder_gen = WaveGenerator(self.songs['harder'])
         self.stronger_gen = WaveGenerator(self.songs['stronger'])
+        self.drop_gen = WaveGenerator(self.songs['drop'],True)
+        self.drop_gen2 = WaveGenerator(self.songs['drop2'],True)
+        self.drop_gen3 = WaveGenerator(self.songs['drop3'],True)
+        self.drop_gen4 = WaveGenerator(self.songs['drop4'],True)
+        self.drop_gen5 = WaveGenerator(self.songs['drop5'],True)
+        self.getdown_gen = WaveGenerator(self.songs['getdown'])
+        self.getdownbuild_gen = WaveGenerator(self.songs['getdownbuild'],True)
+        self.getup_gen = WaveGenerator(self.songs['getup'])
+        self.overtime_gen = WaveGenerator(self.songs['overtime'])
+        self.again_gen = WaveGenerator(self.songs['again'])
+        self.build_gen = WaveGenerator(self.songs['build'],True)
+
+        self.gens = []
+        self.gens.append(self.shelter_gen)
+        self.gens.append(self.workit_gen)
+        self.gens.append(self.doit_gen)
+        self.gens.append(self.harder_gen)
+        self.gens.append(self.stronger_gen)
+        self.gens.append(self.drop_gen)
+        self.gens.append(self.drop_gen2)
+        self.gens.append(self.drop_gen3)
+        self.gens.append(self.drop_gen4)
+        self.gens.append(self.drop_gen5)
+        self.gens.append(self.getdown_gen)
+        self.gens.append(self.getdownbuild_gen)
+        self.gens.append(self.getup_gen)
+        self.gens.append(self.overtime_gen)
+        self.gens.append(self.again_gen)
+        self.gens.append(self.build_gen)
 
         self.launchpad = {}
-        self.launchpad["shelter"] = self.shelter_gen
-        self.launchpad["workit"] = self.workit_gen
-        self.launchpad["harder"]  = self.harder_gen
-        self.launchpad["doit"] = self.doit_gen
-        self.launchpad["stronger"] = self.stronger_gen
-
-        self.mixer.add(self.shelter_gen)
-        self.mixer.add(self.harder_gen)
-        self.mixer.add(self.stronger_gen)
-        self.mixer.add(self.workit_gen)
-        self.mixer.add(self.doit_gen)
-        self.workit_gen.pause()
-        self.shelter_gen.pause()
-        self.doit_gen.pause()
-        self.harder_gen.pause()
-        self.stronger_gen.pause()
+        for i in range(len(self.gens)): 
+            self.launchpad[keys[i]] = self.gens[i]
         
+            self.mixer.add(self.gens[i])
+            self.gens[i].pause()
 
         self.L = Launchpad(self)
         # print('HI THERE\n HI THERE')
@@ -59,7 +74,7 @@ class MainWidget(BaseWidget) :
         self.launchpad[key] = WaveGenerator(self.songs[key])
 
     def play_audio(self, key):
-        print("PLAY THIS AUDIO " , key, " and exists: ",key in self.launchpad.keys())
+        #print("PLAY THIS AUDIO " , key, " and exists: ",key in self.launchpad.keys())
         if(key in self.launchpad.keys()):
             if(self.launchpad[key].loop):
                 self.launchpad[key].play_toggle()
@@ -90,9 +105,27 @@ class MainWidget(BaseWidget) :
         elif(keycode[1] == 'q'):
             raise SystemExit
         elif(keycode[1] == 'a'):
-            self.play_audio("workit")
+            self.play_audio("drop")
         elif(keycode[1] == 's'):
-            self.play_audio("doit")
+            self.play_audio("drop2")
+        elif(keycode[1] == 'd'):
+            self.play_audio("drop3")
+        elif(keycode[1] == 'f'):
+            self.play_audio("drop4")
+        elif(keycode[1] == 'g'):
+            self.play_audio("drop5")
+        elif(keycode[1] == 'h'):
+            self.play_audio("getdown")
+        elif(keycode[1] == 'j'):
+            self.play_audio("getdownbuild")
+        elif(keycode[1] == 'k'):
+            self.play_audio("getup")
+        elif(keycode[1] == 'l'):
+            self.play_audio("build")
+        elif(keycode[1] == 'z'):
+            self.play_audio("overtime")
+        elif(keycode[1] == 'x'):
+            self.play_audio("again")
             
 
 
