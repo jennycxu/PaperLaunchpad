@@ -46,7 +46,8 @@ class BoundingPoly :
         new_points.append((max_x,min_y))
         new_points.append((max_x,max_y))
         return new_points
-
+    def __str__(self):
+        return "points: " + str(self.points) + " and area:" + str(self.get_area())
     def equals(self, other):
         points_similar = False
         for i in range(len(self.points)):

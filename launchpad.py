@@ -1,12 +1,12 @@
 import cv2
 import numpy as np 
-
+from detect_shapes import ShapeDetector
 
 class Launchpad():
 
 	def __init__(self):
 		self.cap = cv2.VideoCapture(0)
-		pass
+		self.shape_detector = ShapeDetector()
 
 	def has_changed(self, i, j, past_frame, tolerance):
 		for x in range (i - tolerance, i + tolerance):
@@ -108,9 +108,7 @@ class Launchpad():
 			# edges = cv2.Canny(gray, 100, 200)
 			# print(frame.shape)
 
-			edges = cv2.Canny(frame, 100, 200)/255
-			current_frame = edges
-
+			edges = cv2.Canny(frame, 100, 200)			
 			# hard_code = [(300, 520), (400, 520), (300, 670),(400, 670)]
 			# for i, j in hard_code:
 			# 	for x in range(-5, 6):
@@ -119,20 +117,30 @@ class Launchpad():
 
 			# box = [(330, 570), (370, 570), (330, 620),(370, 620)]
 
-			boxes = JENNY_FUNCTION_CALL(frame)
+			boxes = self.shape_detector.find_bounding_boxes(edges)
+
+			current_frame = edges/255
+			
+			print("========= BOXeS ==========")
+			for poly in boxes:
+				print(poly)
+				print("\n")
+				for j, i in poly.points:
+					for x in range(-5, 6):
+						for y in range(-5, 6):
+							current_frame[i + x][j+ y] = 1
+			print("========== END BOXES =======")
 
 			kernel = [[1 for x in range(10)] for y in range(2)]
 			threshold = 6
 			kernel_group = (kernel, threshold)
 			frames = (current_frame, past1_frame, past2_frame)
 
-			
-			
-			val = self.find_touch(kernel_group, frames, box)
-			if val:
-				count += 1
-				print("count: " + str(count))
-				print(val)
+			# val = self.find_touch(kernel_group, frames, box)
+			# if val:
+			# 	count += 1
+			# 	print("count: " + str(count))
+			# 	print(val)
 
 
 			# possible_changes = []
@@ -160,7 +168,7 @@ class Launchpad():
 			# cv2.imshow("frame", gray)
 			# cv2.imshow("laplacian", laplacian)
 			
-			cv2.imshow('edges', edges)
+			cv2.imshow('current frame', current_frame)
 
 			if cv2.waitKey(1) & 0xFF == ord('q'):
 				break
