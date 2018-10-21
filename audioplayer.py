@@ -18,7 +18,7 @@ class MainWidget(BaseWidget) :
 
         self.audio.set_generator(self.mixer)
 
-        keys = ["shelter","workit","harder","doit","stronger","drop"]
+        keys = ["shelter","workit","harder","doit","stronger","drop","drop2","drop3","drop4","drop5"]
         self.songs = {}
         for key in keys:
             self.songs[key] = WaveFile("data/" + key + ".wav")
@@ -29,6 +29,10 @@ class MainWidget(BaseWidget) :
         self.harder_gen = WaveGenerator(self.songs['harder'])
         self.stronger_gen = WaveGenerator(self.songs['stronger'])
         self.drop_gen = WaveGenerator(self.songs['drop'],True)
+        self.drop_gen2 = WaveGenerator(self.songs['drop2'],True)
+        self.drop_gen3 = WaveGenerator(self.songs['drop3'],True)
+        self.drop_gen4 = WaveGenerator(self.songs['drop4'],True)
+        self.drop_gen5 = WaveGenerator(self.songs['drop5'],True)
 
         self.gens = []
         self.gens.append(self.shelter_gen)
@@ -37,6 +41,10 @@ class MainWidget(BaseWidget) :
         self.gens.append(self.harder_gen)
         self.gens.append(self.stronger_gen)
         self.gens.append(self.drop_gen)
+        self.gens.append(self.drop_gen2)
+        self.gens.append(self.drop_gen3)
+        self.gens.append(self.drop_gen4)
+        self.gens.append(self.drop_gen5)
 
         self.launchpad = {}
         for i in range(len(self.gens)): 
@@ -84,9 +92,15 @@ class MainWidget(BaseWidget) :
         elif(keycode[1] == 'q'):
             raise SystemExit
         elif(keycode[1] == 'a'):
-            self.play_audio("workit")
-        elif(keycode[1] == 's'):
             self.play_audio("drop")
+        elif(keycode[1] == 's'):
+            self.play_audio("drop2")
+        elif(keycode[1] == 'd'):
+            self.play_audio("drop3")
+        elif(keycode[1] == 'f'):
+            self.play_audio("drop4")
+        elif(keycode[1] == 'g'):
+            self.play_audio("drop5")
             
 
 
