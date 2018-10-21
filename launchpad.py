@@ -28,7 +28,9 @@ class Launchpad():
 		self.is_calibrating = True
 
 		self.button_gen_mappings = {}
-		self.default_gen_mapping = {"1":"doit","2":"workit","3":"harder","4":"shelter"}
+		self.shelter_mapping = ["shelter","drop","drop2","drop3","drop4","drop5","high A","high G"]
+		self.unforgettable_mapping = ["high A","high G", "Ab","Gb","Db","Eb","entire","drop"]
+		self.song_mappings = {"shelter":[(2,4),[1,2],self.shelter_mapping],"unforgettable":[(3,3),[1],self.unforgettable_mapping]}
 
 	def has_changed(self, i, j, past_frame, tolerance):
 		for x in range (i - tolerance, i + tolerance):

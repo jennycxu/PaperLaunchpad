@@ -101,6 +101,11 @@ class MainWidget(BaseWidget) :
         self.L = Launchpad(self)
         # print('HI THERE\n HI THERE')
         self.L.calibration_mode()
+
+    def reset(self):
+        for i in range(len(self.gens)): 
+            self.gens[i].reset()
+
     # in the case that this a note that hasn't played yet 
     def reset_audio(self,key):
         #make a new instance 
