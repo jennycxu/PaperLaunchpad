@@ -19,6 +19,9 @@ class MainWidget(BaseWidget) :
 
         self.audio.set_generator(self.mixer)
 
+        # Initialize and create all the wave buffers from the regions 
+        self.wave_buffers = make_wave_buffers("data/unforgettable_regions.txt","data/unforgettable_beat.wav")
+
         keys = ["shelter","workit","harder","doit","stronger","drop","drop2","drop3","drop4","drop5","getdown","getdownbuild","getup","overtime","again","build","high A","high G","Ab","Gb","Db","Eb","entire"]
         self.songs = {}
         for key in keys:
@@ -50,9 +53,7 @@ class MainWidget(BaseWidget) :
         self.overtime_gen = WaveGenerator(self.songs['overtime'])
         self.again_gen = WaveGenerator(self.songs['again'])
         self.build_gen = WaveGenerator(self.songs['build'],True)
-
-        # Initialize and create all the wave buffers from the regions 
-        self.wave_buffers = make_wave_buffers("data/unforgettable_regions.txt","data/unforgettable_beat.wav")
+ 
 
         #  Create all of the generators for the song 
         # sections allow for that 

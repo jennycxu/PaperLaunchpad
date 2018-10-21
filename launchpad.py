@@ -18,7 +18,7 @@ class Launchpad():
 		self.audio = audio
 
 		# number of frames from the last press
-		self.press_threshold = 15
+		self.press_threshold = 20
 
 		# Is given during calibration step, will tell you dimensions of the current launchpad
 		self.dimensions = None
@@ -34,7 +34,7 @@ class Launchpad():
 		self.button_gen_mappings = {}
 		self.shelter_mapping = ["shelter","drop","drop2","drop3","drop4","drop5","high A","high G"]
 		self.unforgettable_mapping = ["high A","high G", "Ab","Gb","Db","Eb","entire","drop"]
-		self.song_mappings = {"shelter":[(2,4),[1,2],self.shelter_mapping],"unforgettable":[(3,3),[1],self.unforgettable_mapping]}
+		self.song_mappings = {"shelter":[(2,4),[1,2],self.shelter_mapping],"unforgettable":[(4, 2),[1],self.unforgettable_mapping]}
 
 
 	def set_dimensions(dims):
@@ -153,7 +153,7 @@ class Launchpad():
 
 		actual_box = frame[top:bot+1, left:right+1]
 		convolution = ndimage.convolve(actual_box, kernel, mode='constant')
-		print(np.max(convolution))
+
 		values =  np.where(convolution > threshold)
 
 		if values[0].size > 0:
@@ -220,22 +220,21 @@ class Launchpad():
 
 			# boxes = sorted()
 
-			self.boxes = boxes
+			func = lambda y: min([x[1] for x in y])
+			self.boxes = sorted(boxes, key=lambda x: func(x.get_valid_shape()))
+			print([box.get_valid_shape() for box in self.boxes])
 
 			for box in self.boxes:
-				self.box_state[box] = False
+				self.box_state[box] = 0
 
-			for i in range(8):
-				self.box_generators[self.boxes[i]] = ['shelter', 'doit', 'workit', 'harder', 'stronger', 'drop', 'drop2', 'drop3'][i]
+			# for i in range(8):
+			# 	self.box_generators[self.boxes[i]] = ['shelter', 'doit', 'workit', 'harder', 'stronger', 'drop', 'drop2', 'drop3'][i]
 			# self.box_generators[self.boxes[0]] = 'doit'
 			# self.box_generators[self.boxes[1]] = 'workit'
 
 			self.is_calibrating = False
 
 			self.audio.reset()
-
-			
-
 
 		elif keypress == ord('n'):
 			self.calibration_mode()
@@ -321,6 +320,7 @@ class Launchpad():
 			if touch_down:
 				print("count: " + str(self.count))
 				print(touch_down)
+				print('box: ' + str(box))
 
 
 		# t = time.time()
