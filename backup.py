@@ -1,8 +1,8 @@
 import cv2
 import numpy as np 
 from detect_shapes import ShapeDetector
-import time
 
+## BACK UP FROM AFTER REFACTORING (HAVEN't started looking for touch inmultiple boxes)
 class Launchpad():
 
 	def __init__(self):
@@ -121,69 +121,53 @@ class Launchpad():
 			ret, frame = self.cap.read()
 			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 			edges = cv2.Canny(frame, 100, 200)
-
 	def main(self):
 		# past_frame = np.zeros((720,1080))
 
 		past1_frame = np.zeros((720,1080))
 		past2_frame = np.zeros((720,1080))
 		count = 0
-
 		while True:
-			# t = time.time()
 			ret, frame = self.cap.read()
-			# print("checkpoint 1", str(time.time() - t))
-
-			# t = time.time()
 			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-			# print("checkpoint 2", str(time.time() - t))
 
-			# t = time.time()
-			edges = cv2.Canny(frame, 100, 200)				
-			# print("checkpoint 3", str(time.time() - t))
-
-			# t = time.time()
+			edges = cv2.Canny(frame, 100, 200)			
+			
+		
 			boxes = self.shape_detector.find_bounding_boxes(edges)
-			# print("checkpoint 4", str(time.time() - t))
 
 			current_frame = edges/255
 
-			# t = time.time()
-			# box = [(330, 570), (370, 570), (330, 620),(370, 620)]
-			# self.draw_hard_code(box, current_frame)
+			box = [(330, 570), (370, 570), (330, 620),(370, 620)]
+			self.draw_hard_code(box, current_frame)
 			
-			# self.draw_shape_detector_box(current_frame)
+			self.draw_shape_detector_box(current_frame)
 
-			# print("========= BOXeS ==========")
-			# for poly in boxes:
-			# 	print(poly)
-			# 	print("\n")
-			# 	for i, j in poly.get_valid_shape():
-			# 		for x in range(-5, 6):
-			# 			for y in range(-5, 6):
-			# 				current_frame[i + x][j+ y] = 1
-			# print("========== END BOXES =======")
-
-			# print("checkpoint 5", str(time.time() - t))
+			print("========= BOXeS ==========")
+			for poly in boxes:
+				print(poly)
+				print("\n")
+				for i, j in poly.points:
+					for x in range(-5, 6):
+						for y in range(-5, 6):
+							current_frame[i + x][j+ y] = 1
+			print("========== END BOXES =======")
 
 			kernel = [[1 for x in range(10)] for y in range(2)]
 			threshold = 6
 			kernel_group = (kernel, threshold)
 			frames = (current_frame, past1_frame, past2_frame)
 
-			for bounding_box in boxes:
-				box = bounding_box.get_valid_shape()
-				val = self.find_touch(kernel_group, frames, box)
-				if val:
-					count += 1
-					print("count: " + str(count))
-					print(val)
+			# val = self.find_touch(kernel_group, frames, box)
+			# if val:
+			# 	count += 1
+			# 	print("count: " + str(count))
+			# 	print(val)
 
 			# print_lowest_i(edges)
 			# print_lowest_j(edges)
-			# t = time.time()
+			
 			cv2.imshow('current frame', current_frame)
-			# print("checkpoint 6", str(time.time() - t))
 
 			keypress = cv2.waitKey(1) & 0xFF
 			if keypress == ord('q'):
