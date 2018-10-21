@@ -6,14 +6,23 @@ from scipy import ndimage
 
 class Launchpad():
 
-	def __init__(self, callback):
+	def __init__(self, audio):
 		self.cap = cv2.VideoCapture(0)
 		self.shape_detector = ShapeDetector(50, 1200, 100, 700)
 		self.past1_frame = np.zeros((720,1080))
 		self.past2_frame = np.zeros((720,1080))
 		self.count = 0
-		self.callback = callback
+
+		self.audio = audio
+
+		# Is given during calibration step, will tell you dimensions of the current launchpad
+		self.dimensions = None
+
 		self.boxes = []
+
+		# Tells you if a box is pressed
+		self.box_state = {}
+		self.box_generators = {}
 		self.is_calibrating = True
 
 	def has_changed(self, i, j, past_frame, tolerance):
@@ -107,8 +116,7 @@ class Launchpad():
 		for i in range(top, bot - x + 2):
 			for j in range(left, right - y + 2):	
 				kernel_val = self.apply_kernel(kernel, frame, (i,j))
-				# if kernel_val > 6:
-				# 	print((i,j))
+
 				# Indicates that we have a touch!
 				if kernel_val > threshold and self.check_past_frames(kernel_group, past_frames, (i,j)):
 					return (i,j)
@@ -118,13 +126,12 @@ class Launchpad():
 
 		kernel, threshold = kernel_group
 		frame, past_frames = frames[0], frames[1:]
-		# print(box)
+
 		# x and y are num rows and num columns of the kernel
 		x, y = len(kernel), len(kernel[0])
 		top, left = box[0]
 		bot, right = box[-1]
 		dims = (left, right, top, bot)
-		# formula is (right_bound - length of kernel + 1) things to iterate (add 2 because it's a range)
 
 		actual_box = frame[top:bot, left:right]
 		values =  np.where((ndimage.convolve(actual_box, kernel, mode='constant'))> threshold)
@@ -135,7 +142,6 @@ class Launchpad():
 		return None
 
 	def draw_hard_code(self, box, current_frame):
-		
 		for i, j in box:
 			for x in range(-5, 6):
 				for y in range(-5, 6):
@@ -186,22 +192,19 @@ class Launchpad():
 		while keypress not in [ord('y'), ord('n')]:
 			keypress = cv2.waitKey(1) & 0xFF
 		if keypress == ord('y'):
+
+			# boxes = sorted()
+
 			self.boxes = boxes
+
+			for box in self.boxes:
+				self.box_state[box] = False
+
 			self.is_calibrating = False
 		elif keypress == ord('n'):
 			self.calibration_mode()
 		else:
 			print("HOW THE heck DID YOU GET HERE")
-		# confirmation = input()
-		# # confirmation = 'n'
-
-		# # If yes, start the main, otherwise, keep running calibration mode
-		# if confirmation == "y":
-		# 	self.boxes = boxes
-		# 	self.is_calibrating = False
-		# 	return
-		# else:
-		# 	self.calibration_mode()
 
 	def main(self):
 		# past_frame = np.zeros((720,1080))
@@ -252,6 +255,14 @@ class Launchpad():
 		for bounding_box in self.boxes:
 			box = bounding_box.get_valid_shape()
 			val = self.find_touch_vectorized(kernel_group, frames, box)
+
+			sound = self.box_generators[bounding_box]
+
+			# If this box is toggled, do certain things
+			if self.box_state[bounding_box]:
+				if self.audio.is_loop(sound):
+					pass
+
 			if val:
 				self.count += 1
 				print("count: " + str(self.count))

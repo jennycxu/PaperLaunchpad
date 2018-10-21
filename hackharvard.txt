@@ -1,0 +1,27 @@
+1. determine what indicates a press - 
+	in the case of vertical buttons, a finger passes through, but
+	it is at a different position every frame. A real press is determined
+	by having a (horizontal) finger presence that lasts for at least 3 frames
+	(with some padding for jitteryness)
+
+2. Print the boxes
+2.5 calibration step with boxes (press button to calibrate)
+	How to determine boxes - take the sum of 5 consecutive frames. If any pixel has at least a value of 1, that means it was part of the box at some point. This means that we can just take the rightmost of the left side, leftmost of the right side, bottommost of the top side, top most of the bottom side to determine the 4 actual sides of our box (removes noise). Then, make the actual hit box a little smaller to ensure precision (maybe pad ~10 px)
+
+3. Allow for drawing boxes - 
+
+4. other fingers on hand might be actually screwing up the 
+
+Interesting finds:
+- if we use two lights sources (overhead lights and my lamp light, from behind hte computer), then it decreases shadows on the paper
+
+
+TODO;
+toggle
+add sections into the board
+take the lowest button in a section as the actual one being pressed
+
+IF TIME:
+- allow users to draw things and add a sound
+- allow users to click on image and select what instrument they want (manual input)
+- rename boxes as buttons
