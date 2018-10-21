@@ -28,6 +28,9 @@ class MainWidget(BaseWidget) :
             if os.path.exists("data/" + key + ".wav") is True:
                 self.songs[key] = WaveFile("data/" + key + ".wav")
 
+         # Initialize and create all the wave buffers from the regions 
+        self.wave_buffers = make_wave_buffers("data/unforgettable_regions.txt","data/unforgettable_beat.wav")
+
         self.songs["high A"] = self.wave_buffers["high A"]
         self.songs["high G"] = self.wave_buffers["high G"]
         self.songs["Gb"] = self.wave_buffers["Ab"]
@@ -53,7 +56,7 @@ class MainWidget(BaseWidget) :
         self.overtime_gen = WaveGenerator(self.songs['overtime'])
         self.again_gen = WaveGenerator(self.songs['again'])
         self.build_gen = WaveGenerator(self.songs['build'],True)
- 
+
 
         #  Create all of the generators for the song 
         # sections allow for that 
@@ -170,28 +173,28 @@ class MainWidget(BaseWidget) :
             self.L.calibration_mode()
         elif(keycode[1] == 'q'):
             raise SystemExit
-        elif(keycode[1] == 'a'):
-            self.play_audio("high A")
-        elif(keycode[1] == 's'):
-            self.play_audio("high G")
-        elif(keycode[1] == 'd'):
-            self.play_audio("Ab")
-        elif(keycode[1] == 'f'):
-            self.play_audio("Gb")
-        elif(keycode[1] == 'g'):
-            self.play_audio("Db")
-        elif(keycode[1] == 'h'):
-            self.play_audio("Eb")
-        elif(keycode[1] == 'j'):
-            self.play_audio("getdownbuild")
-        elif(keycode[1] == 'k'):
-            self.play_audio("getup")
-        elif(keycode[1] == 'l'):
-            self.play_audio("build")
-        elif(keycode[1] == 'z'):
-            self.play_audio("overtime")
-        elif(keycode[1] == 'x'):
-            self.play_audio("again")
+        # elif(keycode[1] == 'a'):
+        #     self.play_audio("high A")
+        # elif(keycode[1] == 's'):
+        #     self.play_audio("high G")
+        # elif(keycode[1] == 'd'):
+        #     self.play_audio("Ab")
+        # elif(keycode[1] == 'f'):
+        #     self.play_audio("Gb")
+        # elif(keycode[1] == 'g'):
+        #     self.play_audio("Db")
+        # elif(keycode[1] == 'h'):
+        #     self.play_audio("Eb")
+        # elif(keycode[1] == 'j'):
+        #     self.play_audio("getdownbuild")
+        # elif(keycode[1] == 'k'):
+        #     self.play_audio("getup")
+        # elif(keycode[1] == 'l'):
+        #     self.play_audio("build")
+        # elif(keycode[1] == 'z'):
+        #     self.play_audio("overtime")
+        # elif(keycode[1] == 'x'):
+        #     self.play_audio("again")
             
 
 

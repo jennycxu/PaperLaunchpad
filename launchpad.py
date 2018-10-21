@@ -11,7 +11,7 @@ class Launchpad():
 
 	def __init__(self, audio):
 		self.cap = cv2.VideoCapture(0)
-		self.shape_detector = ShapeDetector(50, 1200, 100, 700)
+		self.shape_detector = ShapeDetector(50, 1200, 0, 700)
 		self.past1_frame = np.zeros((720,1080))
 		self.past2_frame = np.zeros((720,1080))
 		self.count = 0
@@ -31,18 +31,17 @@ class Launchpad():
 		self.box_generators = defaultdict(str)
 		self.is_calibrating = True
 
-		self.button_gen_mappings = {}
+		self.button_gen_mappings = []
+
 		self.shelter_mapping = ["shelter","drop","drop2","drop3","drop4","drop5","high A","high G"]
-		self.unforgettable_mapping = ["high A","high G", "Ab","Gb","Db","Eb","entire","drop"]
-		self.song_mappings = {"shelter":[(2,4),[1,2],self.shelter_mapping],"unforgettable":[(4, 2),[1],self.unforgettable_mapping]}
+		# self.unforgettable_mapping = ["high A","high G", "Ab","Gb","Db","Eb","entire","drop"]
+		self.unforgettable_mapping = ["high A","high G", "entire"]
 
+		self.daft_mapping = ["workit","doit", "harder","stronger","again","getup","getdown","build"]
+		self.overtime_mapping = ["getdown","getup", "getdownbuild","overtime","again","drop","drop2","drop3","drop4","drop5"]
+		self.song_mappings = {"s":[(2,4),[1,2],self.shelter_mapping],"u":[(1,3),[1],self.unforgettable_mapping],"d":[(4,2),[2],self.daft_mapping],"o":[(2,5),[1,2],self.overtime_mapping]}
 
-	def set_dimensions(dims):
-		self.dimensions = dims
-
-	def set_sections(sections):
-		pass
-
+	
 	def has_changed(self, i, j, past_frame, tolerance):
 		for x in range (i - tolerance, i + tolerance):
 			for y in range (j - tolerance, j + tolerance):
@@ -220,9 +219,9 @@ class Launchpad():
 
 			# boxes = sorted()
 
-			func = lambda y: min([x[1] for x in y])
-			self.boxes = sorted(boxes, key=lambda x: func(x.get_valid_shape()))
-			print([box.get_valid_shape() for box in self.boxes])
+			
+			self.boxes = boxes 
+			
 
 			for box in self.boxes:
 				self.box_state[box] = 0
@@ -236,10 +235,53 @@ class Launchpad():
 
 			self.audio.reset()
 
+			# Find a song
+			print("Choose a song: s - Shelter, u - Unforgettable, d - Daft Punk, o - Overtime")
+			keypress = cv2.waitKey(1) & 0xFF
+			while keypress not in [ord('s'), ord('u'), ord('d'), ord('o')]:
+				keypress = cv2.waitKey(1) & 0xFF
+			song = chr(keypress)
+
+			self.sections = self.song_mappings[song][1]
+			self.dimensions = self.song_mappings[song][0]
+			self.button_gen_mappings = self.song_mappings[song][2]
+
+			print(self.song_mappings[song])
+
+			sort_y = lambda y: min([x[1] for x in y])
+			self.boxes = sorted(self.boxes, key=lambda x: sort_y(x.get_valid_shape()))
+
+			y_sections = []
+
+			left_border = 0
+			for right in self.sections:
+				y_sections.append(self.boxes[left_border: (right + 1)*self.dimensions[0]])
+				left_border = (right + 1)*self.dimensions[0]
+
+			y_sections.append(self.boxes[left_border:])
+
+			sort_x = lambda y: min([x[0] for x in y])
+
+			new_y_sections = []
+			for i in range(self.dimensions[1]):
+				eles = self.boxes[ i*self.dimensions[0] : (i+1)*self.dimensions[0]]
+				col = sorted(eles, key = lambda x: sort_x(x.get_valid_shape()) )
+				new_y_sections.extend(col)
+
+			self.boxes = new_y_sections
+
+			print([box.get_valid_shape() for box in self.boxes])
+
+			for i in range(len(self.boxes)):
+				box = self.boxes[i]
+				self.box_generators[box] = self.button_gen_mappings[i]
+
 		elif keypress == ord('n'):
 			self.calibration_mode()
 		else:
 			print("HOW THE heck DID YOU GET HERE")
+
+		
 
 	def main(self):
 
