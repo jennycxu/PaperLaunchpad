@@ -12,18 +12,23 @@ class Launchpad():
 		self.past1_frame = np.zeros((720,1080))
 		self.past2_frame = np.zeros((720,1080))
 		self.count = 0
-
 		self.audio = audio
+
+		# number of frames from the last press
+		self.press_threshold = 25
 
 		# Is given during calibration step, will tell you dimensions of the current launchpad
 		self.dimensions = None
 
 		self.boxes = []
 
-		# Tells you if a box is pressed
+		# Tells you if a box is currently pressed or off
 		self.box_state = {}
 		self.box_generators = {}
 		self.is_calibrating = True
+
+		self.button_gen_mappings = {}
+		self.default_gen_mapping = {"1":"doit","2":"workit","3":"harder","4":"shelter"}
 
 	def has_changed(self, i, j, past_frame, tolerance):
 		for x in range (i - tolerance, i + tolerance):
@@ -133,11 +138,18 @@ class Launchpad():
 		bot, right = box[-1]
 		dims = (left, right, top, bot)
 
-		actual_box = frame[top:bot, left:right]
-		values =  np.where((ndimage.convolve(actual_box, kernel, mode='constant'))> threshold)
+		actual_box = frame[top:bot+1, left:right+1]
+		convolution = ndimage.convolve(actual_box, kernel, mode='constant')
+		print(np.max(convolution))
+		values =  np.where(convolution > threshold)
 
-		if values[0].size > 0 and self.check_past_frames(kernel_group, past_frames, (top + values[0][0], left + values[1][0])):
-			return top + values[0][0], left + values[1][0]
+		if values[0].size > 0:
+			print(box)
+			print(top + values[0][0], left + values[1][0])
+			if self.check_past_frames(kernel_group, past_frames, (top + values[0][0], left + values[1][0])):
+				return top + values[0][0], left + values[1][0]
+			else:
+				print('yup I  faILED')
 		
 		return None
 
@@ -207,6 +219,9 @@ class Launchpad():
 			print("HOW THE heck DID YOU GET HERE")
 
 	def main(self):
+
+		self.count += 1
+
 		# past_frame = np.zeros((720,1080))
 		# t = time.time()
 		ret, frame = self.cap.read()
@@ -231,7 +246,7 @@ class Launchpad():
 		
 		# self.draw_shape_detector_box(current_frame)
 
-		np_kernel = np.ones((2,10))
+		np_kernel = np.ones((3,10))
 		threshold = 6
 		kernel_group = (np_kernel, threshold)
 		frames = (current_frame, self.past1_frame, self.past2_frame)
@@ -252,21 +267,36 @@ class Launchpad():
 		# print("========== END BOXES =======")
 
 
-		for bounding_box in self.boxes:
+		for bounding_box in [self.boxes[0]]:
 			box = bounding_box.get_valid_shape()
-			val = self.find_touch_vectorized(kernel_group, frames, box)
+			touch_down = self.find_touch_vectorized(kernel_group, frames, box)
 
-			sound = self.box_generators[bounding_box]
+			# sound = self.box_generators[bounding_box]
 
-			# If this box is toggled, do certain things
-			if self.box_state[bounding_box]:
-				if self.audio.is_loop(sound):
-					pass
+			# Represents the last frame this box was touched
+			state = self.box_state[bounding_box]
 
-			if val:
-				self.count += 1
+			# if self.audio.is_loop(sound):
+
+			# If its a touch down, need to see if it's still a residual from current press or a new press
+			if touch_down:
+				if self.count - state < self.press_threshold:
+					pass # do nothing
+				else:
+					print("YEAH IM GETTING PRESSED")
+					self.box_state[bounding_box] = self.count
+					self.audio.play_audio('doit')
+
+			# else:
+			# 	if state:
+			# 		self.box_state[bounding_box] = False # equivalent to releasing the button
+			# 	else:
+			# 		pass # do nothing, equivalent to still being afloat
+
+
+			if touch_down:
 				print("count: " + str(self.count))
-				print(val)
+				print(touch_down)
 
 
 		# t = time.time()
