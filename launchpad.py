@@ -1,12 +1,13 @@
 import cv2
 import numpy as np 
 from detect_shapes import ShapeDetector
+import time
 
 class Launchpad():
 
 	def __init__(self):
 		self.cap = cv2.VideoCapture(0)
-		self.shape_detector = ShapeDetector()
+		self.shape_detector = ShapeDetector(50, 1200, 100, 700)
 
 	def has_changed(self, i, j, past_frame, tolerance):
 		for x in range (i - tolerance, i + tolerance):
@@ -93,39 +94,66 @@ class Launchpad():
 					return (i,j)
 		return None
 
+
+	def draw_hard_code(self, box, current_frame):
+		
+		for i, j in box:
+			for x in range(-5, 6):
+				for y in range(-5, 6):
+					current_frame[i + x][j+ y] = 1
+
+		
+	def draw_shape_detector_box(self,current_frame):
+		for i in (self.shape_detector.top, self.shape_detector.bottom):
+			for j in range(self.shape_detector.left, self.shape_detector.right):
+				for x in range(-5, 6):
+					for y in range(-5, 6):
+						current_frame[i + x][j+ y] = 1
+
+		for j in (self.shape_detector.left, self.shape_detector.right):
+			for i in range(self.shape_detector.top, self.shape_detector.bottom):
+				for x in range(-5, 6):
+					for y in range(-5, 6):
+						current_frame[i + x][j+ y] = 1
+
+	def calibration_mode(self):
+		while True:
+			ret, frame = self.cap.read()
+			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+			edges = cv2.Canny(frame, 100, 200)
+
 	def main(self):
 		# past_frame = np.zeros((720,1080))
 
 		past1_frame = np.zeros((720,1080))
 		past2_frame = np.zeros((720,1080))
 		count = 0
+
 		while True:
+			t = time.time()
 			ret, frame = self.cap.read()
-			# print(type(frame))
-			# print(frame.shape)
+			print("checkpoint 1", str(time.time() - t))
+
+			t = time.time()
 			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-			# laplacian = cv2.Laplacian(gray, cv2.CV_64F)
-			# edges = cv2.Canny(gray, 100, 200)
-			# print(frame.shape)
+			print("checkpoint 2", str(time.time() - t))
 
-			edges = cv2.Canny(frame, 100, 200)			
-			# hard_code = [(300, 520), (400, 520), (300, 670),(400, 670)]
-			# for i, j in hard_code:
-			# 	for x in range(-5, 6):
-			# 		for y in range(-5, 6):
-			# 			edges[i + x][j+ y] = 100
-
-			# box = [(330, 570), (370, 570), (330, 620),(370, 620)]
-
+			edges = cv2.Canny(frame, 100, 200)				
+		
 			boxes = self.shape_detector.find_bounding_boxes(edges)
 
 			current_frame = edges/255
+
+			box = [(330, 570), (370, 570), (330, 620),(370, 620)]
+			self.draw_hard_code(box, current_frame)
 			
+			self.draw_shape_detector_box(current_frame)
+
 			print("========= BOXeS ==========")
 			for poly in boxes:
 				print(poly)
 				print("\n")
-				for j, i in poly.points:
+				for i, j in poly.points:
 					for x in range(-5, 6):
 						for y in range(-5, 6):
 							current_frame[i + x][j+ y] = 1
@@ -142,36 +170,17 @@ class Launchpad():
 			# 	print("count: " + str(count))
 			# 	print(val)
 
-
-			# possible_changes = []
-			# for i in range(hard_code[0][0], hard_code[-1][0]):
-			# 	for j in range(hard_code[0][1], hard_code[-1][1]):
-			# 		p = current_frame[i][j]
-			# 		if p > 0 and self.has_changed(i, j, past_frame, 5):
-			# 			possible_changes.append((i,j))
-
-			# if possible_changes:
-			# 	tip = max(possible_changes, key=lambda z: z[0])
-
-			# 	print("button press! At: " + str(tip))
-
-
-
 			# print_lowest_i(edges)
 			# print_lowest_j(edges)
-
-			# print(edges/255)
-			# print(gray)
-			# print(type(edges))
-			# print(edges.shape)
-
-			# cv2.imshow("frame", gray)
-			# cv2.imshow("laplacian", laplacian)
 			
 			cv2.imshow('current frame', current_frame)
 
-			if cv2.waitKey(1) & 0xFF == ord('q'):
+			keypress = cv2.waitKey(1) & 0xFF
+			if keypress == ord('q'):
 				break
+
+			elif keypress == ord('c'):
+				self.calibration_mode()
 
 			# past_frame = current_frame
 
@@ -181,6 +190,21 @@ class Launchpad():
 		cv2.destroyAllWindows()
 
 L = Launchpad()
+
+
+# Initial change detection code (only detects diference between current frame and previous frame)
+#
+# possible_changes = []
+# for i in range(hard_code[0][0], hard_code[-1][0]):
+# 	for j in range(hard_code[0][1], hard_code[-1][1]):
+# 		p = current_frame[i][j]
+# 		if p > 0 and self.has_changed(i, j, past_frame, 5):
+# 			possible_changes.append((i,j))
+
+# if possible_changes:
+# 	tip = max(possible_changes, key=lambda z: z[0])
+
+# 	print("button press! At: " + str(tip))
 
 # #  Kernel testing
 # image = [[0, 0, 1, 1, 0], [0 , 0, 1, 1, 0], [0, 0, 0, 0, 0]]

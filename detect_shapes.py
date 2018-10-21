@@ -8,14 +8,18 @@ from boundingpoly import BoundingPoly
 # https://docs.opencv.org/3.3.1/d6/d6e/group__imgproc__draw.html#ga746c0625f1781f1ffc9056259103edbc
 
 class ShapeDetector: 
-    def __init__(self):
+    def __init__(self,left,right,top,bottom):
         self.bounding_boxes = []
+        self.left = left
+        self.right = right
+        self.top = top
+        self.bottom = bottom 
     #img = cv2.imread(img)
    # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
     def find_bounding_boxes(self,gray_img):
         #ret,thresh = cv2.threshold(gray,127,255,1)
-         
+        self.bounding_boxes = []
         #newimg,contours,h = cv2.findContours(gray,1,cv2.CHAIN_APPROX_SIMPLE)
         newimg,contours,h = cv2.findContours(gray_img,1,cv2.CHAIN_APPROX_SIMPLE)
         # ContourApproximationModes CHAIN_APPROX_SIMPLE only stores 4 of these points
@@ -34,17 +38,19 @@ class ShapeDetector:
                 #print( "square")
                 points = []
                 tuple_points = []
+
+                # SWITCH AROUND THE X AND Y BEACUSE APPROX IS A WEIRD AF FUNCTION
                 for i in range(len(approx)):
                     x,y = approx[i][0]
-                    points.append([x,y])
-                    tuple_points.append((x,y))
+                    points.append([y, x])
+                    tuple_points.append((y, x))
                 poly = BoundingPoly(tuple_points)
 
                 is_duplicate = False
                 for i in range(len(self.bounding_boxes)):
                     if(self.bounding_boxes[i].equals(poly)):
                         is_duplicate = True
-                if(is_duplicate is False and poly.is_valid_size()):
+                if(is_duplicate is False and poly.is_valid_size() and self.is_in_bounds(poly)):
                     self.bounding_boxes.append(poly)
                     # only print if large enough
                     
@@ -67,6 +73,13 @@ class ShapeDetector:
                #print( "circle")
                 #cv2.drawContours(img,[cnt],0,(0,255,255),-1)
         return self.bounding_boxes
+    #returns if in the specified bounds
+    def is_in_bounds(self,poly):
+        for row, col in poly.points: 
+            if(row < self.top or row > self.bottom or col < self.left or col > self.right):
+                return False 
+        return True
+
     def draw_bounding_box(self,top_left,bottom_right,pts,tuple_points):
         img = cv2.rectangle(img,top_left,bottom_right,(0,255,0),-1)
         img = cv2.polylines(img,[pts],True,(0,255,255),6)
@@ -74,13 +87,14 @@ class ShapeDetector:
             radius = 10
             img = cv2.circle(img,point, radius, (0,0,255), -1)
 
-# img = cv2.imread("daniel4.png")
-# gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-# sd = ShapeDetector()
-# bounding_boxes = (sd.find_bounding_boxes(gray))
-# for poly in bounding_boxes:
-#     print(poly)
-#     print("\n")
+
+img = cv2.imread("daniel4.png")
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+sd = ShapeDetector(100,700,100,1000)
+bounding_boxes = (sd.find_bounding_boxes(gray))
+for poly in bounding_boxes:
+    print(poly)
+    print("\n")
 
 #cv2.imshow('img',img)
 #cv2.waitKey(0)
