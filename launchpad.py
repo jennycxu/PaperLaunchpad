@@ -201,6 +201,7 @@ class Launchpad():
 
 		current_frame = edges/255
 
+		past_current_frame = np.copy(current_frame)
 		# print("========= BOXeS ==========")
 		for poly in boxes:
 			# print(poly)
@@ -215,7 +216,7 @@ class Launchpad():
 						current_frame[i + x][j+ y] = 1
 
 		cv2.imshow('current frame', current_frame)
-
+		current_frame = past_current_frame
 		print("Is the configuration you want?")
 		keypress = cv2.waitKey(1) & 0xFF
 		while keypress not in [ord('y'), ord('n')]:
@@ -292,7 +293,28 @@ class Launchpad():
 					self.box_generators[box] = self.button_gen_mappings[i]
 
 			else:
-				pass
+				for i in range(len(self.boxes)):
+					box = self.boxes[i].get_valid_shape()
+					self.draw_hard_code(box, current_frame)
+					if i > 0:
+						self.draw_hard_code(self.boxes[i-1].get_valid_shape(), current_frame)
+
+					cv2.imshow('current frame', current_frame)
+					print("Which sound for note " + str(i) + "?")
+
+					keypress = cv2.waitKey(1) & 0xFF
+					while keypress not in [ord(x) for x in 'zxcvbnm,./']:
+						keypress = cv2.waitKey(1) & 0xFF
+					if keypress == ord('z'):
+						self.box_generators[self.boxes[i]] = 'oo'
+					elif keypress == ord('x'):
+						self.box_generators[self.boxes[i]] = 'blurp'
+					elif keypress == ord('c'):
+						self.box_generators[self.boxes[i]] = 'lulpump'
+					elif keypress == ord('v'):
+						self.box_generators[self.boxes[i]] = 'yeuh'
+
+				print('reached end')
 
 		elif keypress == ord('n'):
 			self.calibration_mode()
@@ -362,7 +384,19 @@ class Launchpad():
 				# print(touch_down)
 				# print('box: ' + str(box))
 
-				sections_being_played[self.box_to_section[bounding_box]].append(bounding_box)
+				if self.sections:
+					sections_being_played[self.box_to_section[bounding_box]].append(bounding_box)
+				else:
+					sound = self.box_generators[bounding_box]
+					state = self.box_state[bounding_box]
+					if sound:
+						if self.count - state < self.press_threshold:
+							pass # do nothing
+						else:
+							# print("YEAH IM GETTING PRESSED")
+							self.box_state[bounding_box] = self.count
+							self.audio.play_audio(sound)
+
 
 		for section in sections_being_played:
 			sounds = sections_being_played[section]
