@@ -11,7 +11,10 @@ class Launchpad():
 
 	def __init__(self, audio):
 		self.cap = cv2.VideoCapture(0)
-		self.shape_detector = ShapeDetector(50, 1200, 0, 700)
+
+		# self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+		# self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+		self.shape_detector = ShapeDetector(0, 1200, 0, 700)
 		self.past1_frame = np.zeros((720,1080))
 		self.past2_frame = np.zeros((720,1080))
 		self.count = 0
